@@ -15,14 +15,8 @@ public interface GameRepository extends JpaRepository<Game, String> {
     // Find games by status
     List<Game> findByStatus(Game.GameStatus status);
     
-    // Find active games
-    List<Game> findByStatus(Game.GameStatus.ACTIVE);
-    
-    // Find waiting games
-    List<Game> findByStatus(Game.GameStatus.WAITING);
-    
     // Find completed games
-    List<Game> findByStatusIn(List.of(Game.GameStatus.COMPLETED, Game.GameStatus.DRAW));
+    List<Game> findByStatusIn(List<Game.GameStatus> statuses);
     
     // Find games by player ID
     @Query("SELECT g FROM Game g JOIN g.players p WHERE p.id = :playerId")
@@ -50,11 +44,6 @@ public interface GameRepository extends JpaRepository<Game, String> {
     // Count games by status
     long countByStatus(Game.GameStatus status);
     
-    // Count active games
-    long countByStatus(Game.GameStatus.ACTIVE);
-    
-    // Count waiting games
-    long countByStatus(Game.GameStatus.WAITING);
     
     // Find recent games
     List<Game> findTop10ByOrderByCreatedAtDesc();
