@@ -124,6 +124,56 @@ public class GameControllerTest {
         mockMvc.perform(delete("/api/games/non-existent"))
                 .andExpect(status().isNotFound());
     }
+    
+    @Test
+    public void testCreateGameWithInvalidInput() throws Exception {
+        // Test with empty name
+        mockMvc.perform(post("/api/games")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"\"}"))
+                .andExpect(status().isBadRequest());
+        
+        // Test with null name
+        mockMvc.perform(post("/api/games")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": null}"))
+                .andExpect(status().isBadRequest());
+    }
+    
+    @Test
+    public void testMakeMoveWithInvalidInput() throws Exception {
+        // Test with invalid position
+        mockMvc.perform(post("/api/games/test-game-id/moves")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"playerId\": \"test-player\", \"position\": 10}"))
+                .andExpect(status().isBadRequest());
+        
+        // Test with negative position
+        mockMvc.perform(post("/api/games/test-game-id/moves")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"playerId\": \"test-player\", \"position\": -1}"))
+                .andExpect(status().isBadRequest());
+        
+        // Test with invalid player ID format
+        mockMvc.perform(post("/api/games/test-game-id/moves")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"playerId\": \"invalid@player#id\", \"position\": 1}"))
+                .andExpect(status().isBadRequest());
+    }
+    
+    @Test
+    public void testLeaderboardEndpoint() throws Exception {
+        mockMvc.perform(get("/api/games/leaderboard")
+                .param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+    
+    @Test
+    public void testGameCountEndpoint() throws Exception {
+        mockMvc.perform(get("/api/games/count"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.count").exists());
+    }
 }
-
-// TODO: Add API integration tests for core endpoints [ttt.todo.tests.api]
