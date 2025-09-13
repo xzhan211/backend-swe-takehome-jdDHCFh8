@@ -39,6 +39,11 @@ public class GameService {
             .collect(Collectors.toList());
     }
     
+    // Clear all games (for testing purposes)
+    public void clearAllGames() {
+        games.clear();
+    }
+    
     // Get active games
     public List<Game> getActiveGames() {
         return findByStatus(Game.GameStatus.ACTIVE);
@@ -196,4 +201,3 @@ public class GameService {
     }
 }
 
-// TODO: Implement basic leaderboard endpoint [ttt.feature.leaderboard.basic]

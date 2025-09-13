@@ -2,9 +2,11 @@ package com.example.controller;
 
 import com.example.model.Game;
 import com.example.model.Player;
+import com.example.model.PaginatedResponse;
 import com.example.service.GameService;
 import com.example.service.PlayerService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -195,8 +197,61 @@ public class GameController {
         return ResponseEntity.ok(Map.of("count", count));
     }
     
+    // Get leaderboard (top players by win rate) - legacy endpoint for backward compatibility
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<Player>> getLeaderboard(
+            @RequestParam(defaultValue = "10") int limit) {
+        List<Player> leaderboard = playerService.getLeaderboard(limit);
+        return ResponseEntity.ok(leaderboard);
+    }
+    
+    // Get leaderboard with sorting options
+    @GetMapping("/leaderboard/sorted")
+    public ResponseEntity<List<Player>> getLeaderboardSorted(
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "winrate") String sortBy) {
+        List<Player> leaderboard = playerService.getLeaderboard(limit, sortBy);
+        return ResponseEntity.ok(leaderboard);
+    }
+    
+    // Get leaderboard with pagination
+    @GetMapping("/leaderboard/paginated")
+    public ResponseEntity<PaginatedResponse<Player>> getLeaderboardPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            PaginatedResponse<Player> leaderboard = playerService.getLeaderboardPaginated(page, size);
+            return ResponseEntity.ok(leaderboard);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    // Get leaderboard with pagination and sorting
+    @GetMapping("/leaderboard/paginated/sorted")
+    public ResponseEntity<PaginatedResponse<Player>> getLeaderboardPaginatedSorted(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "winrate") String sortBy) {
+        try {
+            PaginatedResponse<Player> leaderboard = playerService.getLeaderboardPaginated(page, size, sortBy);
+            return ResponseEntity.ok(leaderboard);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    // Clear all games (for testing purposes)
+    @DeleteMapping("/clear")
+    public ResponseEntity<Void> clearAllGames() {
+        gameService.clearAllGames();
+        return ResponseEntity.ok().build();
+    }
+    
     // Request/Response DTOs
     public static class CreateGameRequest {
+        @NotBlank(message = "Game name is required")
+        @Size(min = 1, max = 100, message = "Game name must be between 1 and 100 characters")
         private String name;
         
         public String getName() {
@@ -209,6 +264,8 @@ public class GameController {
     }
     
     public static class AddPlayerRequest {
+        @NotBlank(message = "Player ID is required")
+        @Pattern(regexp = "^[a-zA-Z0-9-]+$", message = "Player ID must contain only alphanumeric characters and hyphens")
         private String playerId;
         
         public String getPlayerId() {
@@ -221,7 +278,12 @@ public class GameController {
     }
     
     public static class MakeMoveRequest {
+        @NotBlank(message = "Player ID is required")
+        @Pattern(regexp = "^[a-zA-Z0-9-]+$", message = "Player ID must contain only alphanumeric characters and hyphens")
         private String playerId;
+        
+        @Min(value = 0, message = "Position must be at least 0")
+        @Max(value = 8, message = "Position must be at most 8")
         private int position;
         
         public String getPlayerId() {
@@ -241,6 +303,3 @@ public class GameController {
         }
     }
 }
-
-// TODO: Add validation for game creation and move inputs [ttt.todo.validation.game-inputs]
-// TODO: Implement basic leaderboard endpoint [ttt.feature.leaderboard.basic]

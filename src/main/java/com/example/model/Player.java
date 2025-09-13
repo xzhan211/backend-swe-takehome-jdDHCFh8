@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -18,27 +20,33 @@ public class Player {
     
     @NotBlank(message = "Player name is required")
     @Size(min = 1, max = 100, message = "Player name must be between 1 and 100 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9\\s\\-_]+$", message = "Player name can only contain letters, numbers, spaces, hyphens, and underscores")
     @Column(nullable = false)
     private String name;
     
     @NotBlank(message = "Player email is required")
     @Email(message = "Player email must be valid")
+    @Size(max = 255, message = "Email must be less than 255 characters")
     @Column(nullable = false, unique = true)
     private String email;
     
+    @NotNull(message = "Player stats are required")
     @Embedded
     private PlayerStats stats;
     
+    @NotNull(message = "Created date is required")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(nullable = false)
     private LocalDateTime createdAt;
     
+    @NotNull(message = "Updated date is required")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(nullable = false)
     private LocalDateTime updatedAt;
     
     // Default constructor
     public Player() {
+        this.id = java.util.UUID.randomUUID().toString();
         this.stats = new PlayerStats();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
@@ -106,5 +114,3 @@ public class Player {
         this.updatedAt = LocalDateTime.now();
     }
 }
-
-// TODO: Add Player and Game model input validation [ttt.todo.model.validation]

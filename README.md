@@ -37,7 +37,7 @@ The application will start on port 8080.
 mvn test
 ```
 
-### Running the Simulation
+### Running the Simulation (DONE)
 
 > Optional: You may create a simple simulation script or test that spins up your server, plays multiple sessions concurrently, and prints a small leaderboard summary.
 
@@ -67,7 +67,7 @@ src/
 
 ## What You Need to Implement
 
-### Selected Tasks
+### Selected Tasks (DONE)
 
 #### TODOs
 - Implement PlayerService (create/get/update/delete/search/stats)
@@ -80,13 +80,13 @@ src/
 - Complete games routes (status, join, moves, stats, delete, list)
 - Add validation for game creation and move inputs
 
-#### Feature Requests
+#### Feature Requests (DONE)
 - Implement basic leaderboard endpoint
 - Add basic rate limiting middleware
 
-#### Bugs To Fix
+#### Bugs To Fix (DONE)
 
-### Core Requirements (high-level)
+### Core Requirements (high-level) (DONE)
 
 1. Turn-based rules on a finite grid with obvious invalid-move conditions
 2. Multiple sessions can run concurrently; two players start a session
@@ -109,34 +109,95 @@ Additionally, look for inline TODOs in language-appropriate files. Examples:
 
 Assuming your server is running on http://localhost:8080
 
-Create a game
+### 1. Create Players
 ```bash
-curl -s -X POST http://localhost:8080/games -H 'Content-Type: application/json' -d '{"name":"Sample"}' | jq .
+# Create player 1
+curl -s -X POST http://localhost:8080/api/players -H 'Content-Type: application/json' -d '{"name":"Alice","email":"alice@example.com"}' | jq .
+
+# Create player 2  
+curl -s -X POST http://localhost:8080/api/players -H 'Content-Type: application/json' -d '{"name":"Bob","email":"bob@example.com"}' | jq .
 ```
 
-Join the game
+### 2. Create a Game
 ```bash
-GAME_ID=<paste-from-create>
-curl -s -X POST http://localhost:8080/games/$GAME_ID/join -H 'Content-Type: application/json' -d '{"playerId":"player-1"}' | jq .
-curl -s -X POST http://localhost:8080/games/$GAME_ID/join -H 'Content-Type: application/json' -d '{"playerId":"player-2"}' | jq .
+curl -s -X POST http://localhost:8080/api/games -H 'Content-Type: application/json' -d '{"name":"Sample Game"}' | jq .
 ```
 
-Make a move and get status
+### 3. Add Players to Game
 ```bash
-curl -s -X POST http://localhost:8080/games/$GAME_ID/moves -H 'Content-Type: application/json' -d '{"playerId":"player-1","row":0,"col":0}' | jq .
-curl -s http://localhost:8080/games/$GAME_ID/status | jq .
+GAME_ID=<paste-game-id-from-create>
+PLAYER1_ID=<paste-player1-id-from-create>
+PLAYER2_ID=<paste-player2-id-from-create>
+
+# Add player 1 to game
+curl -s -X POST http://localhost:8080/api/games/$GAME_ID/players -H 'Content-Type: application/json' -d '{"playerId":"$PLAYER1_ID"}' | jq .
+
+# Add player 2 to game
+curl -s -X POST http://localhost:8080/api/games/$GAME_ID/players -H 'Content-Type: application/json' -d '{"playerId":"$PLAYER2_ID"}' | jq .
 ```
 
-Leaderboard (optional)
+### 4. Make Moves and Check Status
 ```bash
-curl -s http://localhost:8080/leaderboard | jq .
+# Make a move (position 0-8 for 3x3 grid)
+curl -s -X POST http://localhost:8080/api/games/$GAME_ID/moves -H 'Content-Type: application/json' -d '{"playerId":"$PLAYER1_ID","position":0}' | jq .
+
+# Check game status
+curl -s http://localhost:8080/api/games/$GAME_ID/status | jq .
+
+# Make another move
+curl -s -X POST http://localhost:8080/api/games/$GAME_ID/moves -H 'Content-Type: application/json' -d '{"playerId":"$PLAYER2_ID","position":1}' | jq .
+
+# Check game board
+curl -s http://localhost:8080/api/games/$GAME_ID/board | jq .
+```
+
+### 5. Leaderboard Options
+```bash
+# Basic leaderboard (top 10 by win rate)
+curl -s http://localhost:8080/api/games/leaderboard | jq .
+
+# Leaderboard sorted by wins
+curl -s http://localhost:8080/api/games/leaderboard/sorted?sortBy=wins&limit=5 | jq .
+
+# Paginated leaderboard
+curl -s http://localhost:8080/api/games/leaderboard/paginated?page=0&size=5 | jq .
+
+# Paginated leaderboard sorted by wins
+curl -s http://localhost:8080/api/games/leaderboard/paginated/sorted?page=0&size=5&sortBy=wins | jq .
+```
+
+### 6. Additional Useful Endpoints
+```bash
+# Get all games
+curl -s http://localhost:8080/api/games | jq .
+
+# Get active games only
+curl -s http://localhost:8080/api/games/active | jq .
+
+# Get player statistics
+curl -s http://localhost:8080/api/players/$PLAYER1_ID/stats | jq .
+
+# Get all players
+curl -s http://localhost:8080/api/players | jq .
+
+# Search players by name
+curl -s http://localhost:8080/api/players?name=Alice | jq .
 ```
 
 ## Submission
 
-1. Ensure tests pass
-2. Run the simulation script
-3. Update this README with any setup notes
-4. Submit your repository URL
+1. Ensure tests pass (DONE)
+2. Run the simulation script (DONE - integration test)
+3. Update this README with any setup notes (DONE)
+4. Submit your repository URL (DONE - https://github.com/xzhan211/backend-swe-takehome-jdDHCFh8)
+
+
+## Key evolution in the future
+1. Currently we keep repository and H2 DB but we only use pure in-memory data structures. Data will lose when service is down.
+It's ready for when someone wants to add database persistence. (RDBMS like Postgres or MySQL should be good, NoSQL is good as well, since the query/business logic is simple.)
+2. Authentication and authorization (e.g. Google SSO)
+3. The service should be scalable for HA, at least 2 pods for the low throughput service.
+4. Having a chat window for players should ensure better UX.
+
 
 Good luck! 🚀
