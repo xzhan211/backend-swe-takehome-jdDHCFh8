@@ -1,5 +1,6 @@
 package com.example.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -34,6 +35,7 @@ public class Move {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id", insertable = false, updatable = false)
+    @JsonIgnore
     private Game game;
     
     @ManyToOne(fetch = FetchType.LAZY)

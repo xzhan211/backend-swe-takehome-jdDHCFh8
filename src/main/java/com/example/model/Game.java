@@ -1,6 +1,7 @@
 package com.example.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -47,6 +48,7 @@ public class Game {
     private Player winner;
     
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Move> moves = new ArrayList<>();
     
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -67,6 +69,7 @@ public class Game {
     
     // Default constructor
     public Game() {
+        this.id = java.util.UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         initializeBoard();
