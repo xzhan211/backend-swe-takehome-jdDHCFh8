@@ -136,6 +136,9 @@ public class Game {
         if (checkWin(symbol)) {
             status = GameStatus.COMPLETED;
             winner = player;
+            // Update stats for completed game
+            players.forEach(p -> p.getStats().incrementGamesPlayed());
+            players.forEach(p -> p.getStats().addMoves(1));
             player.getStats().incrementGamesWon();
             players.stream()
                 .filter(p -> !p.equals(player))
@@ -143,15 +146,14 @@ public class Game {
                 .ifPresent(p -> p.getStats().incrementGamesLost());
         } else if (checkDraw()) {
             status = GameStatus.DRAW;
+            // Update stats for drawn game
+            players.forEach(p -> p.getStats().incrementGamesPlayed());
+            players.forEach(p -> p.getStats().addMoves(1));
             players.forEach(p -> p.getStats().incrementGamesDrawn());
         } else {
             // Switch turns
             currentPlayer = players.get((players.indexOf(currentPlayer) + 1) % 2);
         }
-        
-        // Update stats
-        players.forEach(p -> p.getStats().incrementGamesPlayed());
-        players.forEach(p -> p.getStats().addMoves(1));
         
         updatedAt = LocalDateTime.now();
         return true;
