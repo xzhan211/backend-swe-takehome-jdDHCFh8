@@ -39,6 +39,7 @@ public class Player {
     
     // Default constructor
     public Player() {
+        this.id = java.util.UUID.randomUUID().toString();
         this.stats = new PlayerStats();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
