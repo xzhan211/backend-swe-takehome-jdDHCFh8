@@ -18,7 +18,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {"spring.profiles.active=test"})
 public class GameFlowIntegrationTest {
 
     @Autowired
@@ -200,7 +202,7 @@ public class GameFlowIntegrationTest {
         ResponseEntity<Player> response = restTemplate.postForEntity(
                 baseUrl + "/api/players", entity, Player.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
         return response.getBody().getId();
     }
 
@@ -213,7 +215,7 @@ public class GameFlowIntegrationTest {
         ResponseEntity<Game> response = restTemplate.postForEntity(
                 baseUrl + "/api/games", entity, Game.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
         return response.getBody().getId();
     }
 
@@ -226,7 +228,7 @@ public class GameFlowIntegrationTest {
         ResponseEntity<Void> response = restTemplate.postForEntity(
                 baseUrl + "/api/games/" + gameId + "/players", entity, Void.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
     }
 
     private void makeMove(String gameId, String playerId, int position) throws Exception {
@@ -238,7 +240,7 @@ public class GameFlowIntegrationTest {
         ResponseEntity<Void> response = restTemplate.postForEntity(
                 baseUrl + "/api/games/" + gameId + "/moves", entity, Void.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
     }
 
     private void updatePlayer(String playerId, String name, String email) throws Exception {
@@ -250,14 +252,14 @@ public class GameFlowIntegrationTest {
         ResponseEntity<Player> response = restTemplate.exchange(
                 baseUrl + "/api/players/" + playerId, HttpMethod.PUT, entity, Player.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
     }
 
     private void deletePlayer(String playerId) throws Exception {
         ResponseEntity<Void> response = restTemplate.exchange(
                 baseUrl + "/api/players/" + playerId, HttpMethod.DELETE, null, Void.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
     }
 
     // Helper methods for verification
@@ -265,118 +267,118 @@ public class GameFlowIntegrationTest {
         ResponseEntity<Map> response = restTemplate.getForEntity(
                 baseUrl + "/api/games/" + gameId + "/status", Map.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert expectedStatus.equals(response.getBody().get("status"));
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedStatus, response.getBody().get("status"), "Game status should match");
     }
 
     private void verifyGameMoves(String gameId, int expectedCount) throws Exception {
         ResponseEntity<Object[]> response = restTemplate.getForEntity(
                 baseUrl + "/api/games/" + gameId + "/moves", Object[].class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert response.getBody().length == expectedCount;
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedCount, response.getBody().length, "Move count should match");
     }
 
     private void verifyGamePlayers(String gameId, int expectedCount) throws Exception {
         ResponseEntity<Game> response = restTemplate.getForEntity(
                 baseUrl + "/api/games/" + gameId, Game.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert response.getBody().getPlayers().size() == expectedCount;
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedCount, response.getBody().getPlayers().size(), "Player count should match");
     }
 
     private void verifyGameWinner(String gameId, String expectedWinnerId) throws Exception {
         ResponseEntity<Player> response = restTemplate.getForEntity(
                 baseUrl + "/api/games/" + gameId + "/winner", Player.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert expectedWinnerId.equals(response.getBody().getId());
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedWinnerId, response.getBody().getId(), "Winner ID should match");
     }
 
     private void verifyPlayerStats(String playerId, int gamesPlayed, int gamesWon, int gamesDrawn, int gamesLost) throws Exception {
         ResponseEntity<PlayerStats> response = restTemplate.getForEntity(
                 baseUrl + "/api/players/" + playerId + "/stats", PlayerStats.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
         PlayerStats stats = response.getBody();
-        assert stats.getGamesPlayed() == gamesPlayed;
-        assert stats.getGamesWon() == gamesWon;
-        assert stats.getGamesDrawn() == gamesDrawn;
-        assert stats.getGamesLost() == gamesLost;
+        assertEquals(gamesPlayed, stats.getGamesPlayed(), "Games played should match");
+        assertEquals(gamesWon, stats.getGamesWon(), "Games won should match");
+        assertEquals(gamesDrawn, stats.getGamesDrawn(), "Games drawn should match");
+        assertEquals(gamesLost, stats.getGamesLost(), "Games lost should match");
     }
 
     private void verifyLeaderboard(String playerId, int expectedPosition) throws Exception {
         ResponseEntity<Player[]> response = restTemplate.getForEntity(
                 baseUrl + "/api/players/leaderboard", Player[].class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert expectedPosition <= response.getBody().length;
-        assert playerId.equals(response.getBody()[expectedPosition - 1].getId());
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertTrue(expectedPosition <= response.getBody().length, "Position should be within leaderboard range");
+        assertEquals(playerId, response.getBody()[expectedPosition - 1].getId(), "Player should be at expected position");
     }
 
     private void verifyPlayer(String playerId, String expectedName, String expectedEmail) throws Exception {
         ResponseEntity<Player> response = restTemplate.getForEntity(
                 baseUrl + "/api/players/" + playerId, Player.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
         Player player = response.getBody();
-        assert expectedName.equals(player.getName());
-        assert expectedEmail.equals(player.getEmail());
+        assertEquals(expectedName, player.getName(), "Player name should match");
+        assertEquals(expectedEmail, player.getEmail(), "Player email should match");
     }
 
     private void verifyPlayerNotFound(String playerId) throws Exception {
         ResponseEntity<Void> response = restTemplate.getForEntity(
                 baseUrl + "/api/players/" + playerId, Void.class);
         
-        assert response.getStatusCode().is4xxClientError();
+        assertTrue(response.getStatusCode().is4xxClientError(), "Should return client error for non-existent player");
     }
 
     private void verifyPlayerSearch(String searchTerm, int expectedCount) throws Exception {
         ResponseEntity<Player[]> response = restTemplate.getForEntity(
                 baseUrl + "/api/players?name=" + searchTerm, Player[].class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert response.getBody().length == expectedCount;
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedCount, response.getBody().length, "Move count should match");
     }
 
     private void verifyGameCount(int expectedCount) throws Exception {
         ResponseEntity<Map> response = restTemplate.getForEntity(
                 baseUrl + "/api/games/count", Map.class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert ((Number) response.getBody().get("count")).intValue() == expectedCount;
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedCount, ((Number) response.getBody().get("count")).intValue(), "Game count should match");
     }
 
     private void verifyActiveGames(int expectedCount) throws Exception {
         ResponseEntity<Game[]> response = restTemplate.getForEntity(
                 baseUrl + "/api/games/active", Game[].class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert response.getBody().length == expectedCount;
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedCount, response.getBody().length, "Move count should match");
     }
 
     private void verifyCompletedGames(int expectedCount) throws Exception {
         ResponseEntity<Game[]> response = restTemplate.getForEntity(
                 baseUrl + "/api/games/completed", Game[].class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert response.getBody().length == expectedCount;
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedCount, response.getBody().length, "Move count should match");
     }
 
     private void verifyWaitingGames(int expectedCount) throws Exception {
         ResponseEntity<Game[]> response = restTemplate.getForEntity(
                 baseUrl + "/api/games/waiting", Game[].class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert response.getBody().length == expectedCount;
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedCount, response.getBody().length, "Move count should match");
     }
 
     private void verifyGamesByStatus(String status, int expectedCount) throws Exception {
         ResponseEntity<Game[]> response = restTemplate.getForEntity(
                 baseUrl + "/api/games?status=" + status, Game[].class);
         
-        assert response.getStatusCode().is2xxSuccessful();
-        assert response.getBody().length == expectedCount;
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Request should be successful");
+        assertEquals(expectedCount, response.getBody().length, "Move count should match");
     }
     
     private void clearAllData() throws Exception {
