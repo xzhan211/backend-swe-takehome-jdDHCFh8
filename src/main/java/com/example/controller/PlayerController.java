@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.model.Player;
 import com.example.model.PlayerStats;
+import com.example.model.PaginatedResponse;
 import com.example.service.PlayerService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -84,12 +85,25 @@ public class PlayerController {
         }
     }
     
-    // Get leaderboard
+    // Get leaderboard (legacy endpoint for backward compatibility)
     @GetMapping("/leaderboard")
     public ResponseEntity<List<Player>> getLeaderboard(
             @RequestParam(defaultValue = "10") int limit) {
         List<Player> leaderboard = playerService.getLeaderboard(limit);
         return ResponseEntity.ok(leaderboard);
+    }
+    
+    // Get leaderboard with pagination
+    @GetMapping("/leaderboard/paginated")
+    public ResponseEntity<PaginatedResponse<Player>> getLeaderboardPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            PaginatedResponse<Player> leaderboard = playerService.getLeaderboardPaginated(page, size);
+            return ResponseEntity.ok(leaderboard);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     // Clear all players (for testing purposes)

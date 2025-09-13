@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.model.Game;
 import com.example.model.Player;
+import com.example.model.PaginatedResponse;
 import com.example.service.GameService;
 import com.example.service.PlayerService;
 import jakarta.validation.Valid;
@@ -196,12 +197,25 @@ public class GameController {
         return ResponseEntity.ok(Map.of("count", count));
     }
     
-    // Get leaderboard (top players by win rate)
+    // Get leaderboard (top players by win rate) - legacy endpoint for backward compatibility
     @GetMapping("/leaderboard")
     public ResponseEntity<List<Player>> getLeaderboard(
             @RequestParam(defaultValue = "10") int limit) {
         List<Player> leaderboard = playerService.getLeaderboard(limit);
         return ResponseEntity.ok(leaderboard);
+    }
+    
+    // Get leaderboard with pagination
+    @GetMapping("/leaderboard/paginated")
+    public ResponseEntity<PaginatedResponse<Player>> getLeaderboardPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            PaginatedResponse<Player> leaderboard = playerService.getLeaderboardPaginated(page, size);
+            return ResponseEntity.ok(leaderboard);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     // Clear all games (for testing purposes)

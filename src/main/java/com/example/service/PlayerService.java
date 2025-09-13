@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.model.Player;
 import com.example.model.PlayerStats;
+import com.example.model.PaginatedResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -86,13 +87,65 @@ public class PlayerService {
         return player.getStats();
     }
     
-    // Get leaderboard (top players by win rate)
+    // Get leaderboard (top players by win rate) - legacy method for backward compatibility
     public List<Player> getLeaderboard(int limit) {
         return players.values().stream()
             .filter(player -> player.getStats().getGamesPlayed() > 0)
             .sorted((p1, p2) -> Double.compare(p2.getStats().getWinRate(), p1.getStats().getWinRate()))
             .limit(limit)
             .collect(Collectors.toList());
+    }
+    
+    // Get leaderboard with pagination
+    public PaginatedResponse<Player> getLeaderboardPaginated(int page, int size) {
+        // Validate pagination parameters
+        if (page < 0) {
+            throw new IllegalArgumentException("Page number must be non-negative");
+        }
+        if (size <= 0) {
+            throw new IllegalArgumentException("Page size must be positive");
+        }
+        
+        // Get all players with games played > 0, sorted by win rate
+        List<Player> allPlayers = players.values().stream()
+            .filter(player -> player.getStats().getGamesPlayed() > 0)
+            .sorted((p1, p2) -> Double.compare(p2.getStats().getWinRate(), p1.getStats().getWinRate()))
+            .collect(Collectors.toList());
+        
+        long totalElements = allPlayers.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        
+        // Handle empty result
+        if (totalElements == 0) {
+            return new PaginatedResponse<>(
+                Collections.emptyList(),
+                new PaginatedResponse.PageInfo(0, size, 0, 0, true, true)
+            );
+        }
+        
+        // Validate page number
+        if (page >= totalPages) {
+            throw new IllegalArgumentException("Page number " + page + " is out of range. Total pages: " + totalPages);
+        }
+        
+        // Calculate pagination
+        int offset = page * size;
+        List<Player> pageContent = allPlayers.stream()
+            .skip(offset)
+            .limit(size)
+            .collect(Collectors.toList());
+        
+        // Create page info
+        PaginatedResponse.PageInfo pageInfo = new PaginatedResponse.PageInfo(
+            page,
+            size,
+            totalElements,
+            totalPages,
+            page == 0,
+            page == totalPages - 1
+        );
+        
+        return new PaginatedResponse<>(pageContent, pageInfo);
     }
     
     // Clear all players (for testing purposes)
