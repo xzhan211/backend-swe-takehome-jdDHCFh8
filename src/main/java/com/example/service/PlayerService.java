@@ -89,15 +89,25 @@ public class PlayerService {
     
     // Get leaderboard (top players by win rate) - legacy method for backward compatibility
     public List<Player> getLeaderboard(int limit) {
+        return getLeaderboard(limit, "winrate");
+    }
+    
+    // Get leaderboard with sorting options
+    public List<Player> getLeaderboard(int limit, String sortBy) {
         return players.values().stream()
             .filter(player -> player.getStats().getGamesPlayed() > 0)
-            .sorted((p1, p2) -> Double.compare(p2.getStats().getWinRate(), p1.getStats().getWinRate()))
+            .sorted(getSortingComparator(sortBy))
             .limit(limit)
             .collect(Collectors.toList());
     }
     
     // Get leaderboard with pagination
     public PaginatedResponse<Player> getLeaderboardPaginated(int page, int size) {
+        return getLeaderboardPaginated(page, size, "winrate");
+    }
+    
+    // Get leaderboard with pagination and sorting
+    public PaginatedResponse<Player> getLeaderboardPaginated(int page, int size, String sortBy) {
         // Validate pagination parameters
         if (page < 0) {
             throw new IllegalArgumentException("Page number must be non-negative");
@@ -106,10 +116,10 @@ public class PlayerService {
             throw new IllegalArgumentException("Page size must be positive");
         }
         
-        // Get all players with games played > 0, sorted by win rate
+        // Get all players with games played > 0, sorted by specified criteria
         List<Player> allPlayers = players.values().stream()
             .filter(player -> player.getStats().getGamesPlayed() > 0)
-            .sorted((p1, p2) -> Double.compare(p2.getStats().getWinRate(), p1.getStats().getWinRate()))
+            .sorted(getSortingComparator(sortBy))
             .collect(Collectors.toList());
         
         long totalElements = allPlayers.size();
@@ -192,6 +202,19 @@ public class PlayerService {
     // Get total player count
     public long getTotalPlayerCount() {
         return players.size();
+    }
+    
+    // Helper method to get sorting comparator based on sortBy parameter
+    private Comparator<Player> getSortingComparator(String sortBy) {
+        if (sortBy == null || sortBy.equalsIgnoreCase("winrate")) {
+            // Default: sort by win rate (descending)
+            return (p1, p2) -> Double.compare(p2.getStats().getWinRate(), p1.getStats().getWinRate());
+        } else if (sortBy.equalsIgnoreCase("wins")) {
+            // Sort by total wins (descending)
+            return (p1, p2) -> Integer.compare(p2.getStats().getGamesWon(), p1.getStats().getGamesWon());
+        } else {
+            throw new IllegalArgumentException("Invalid sortBy parameter. Supported values: 'winrate', 'wins'");
+        }
     }
     
     // Get players created in date range

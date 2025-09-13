@@ -93,6 +93,15 @@ public class PlayerController {
         return ResponseEntity.ok(leaderboard);
     }
     
+    // Get leaderboard with sorting options
+    @GetMapping("/leaderboard/sorted")
+    public ResponseEntity<List<Player>> getLeaderboardSorted(
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "winrate") String sortBy) {
+        List<Player> leaderboard = playerService.getLeaderboard(limit, sortBy);
+        return ResponseEntity.ok(leaderboard);
+    }
+    
     // Get leaderboard with pagination
     @GetMapping("/leaderboard/paginated")
     public ResponseEntity<PaginatedResponse<Player>> getLeaderboardPaginated(
@@ -100,6 +109,20 @@ public class PlayerController {
             @RequestParam(defaultValue = "10") int size) {
         try {
             PaginatedResponse<Player> leaderboard = playerService.getLeaderboardPaginated(page, size);
+            return ResponseEntity.ok(leaderboard);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    // Get leaderboard with pagination and sorting
+    @GetMapping("/leaderboard/paginated/sorted")
+    public ResponseEntity<PaginatedResponse<Player>> getLeaderboardPaginatedSorted(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "winrate") String sortBy) {
+        try {
+            PaginatedResponse<Player> leaderboard = playerService.getLeaderboardPaginated(page, size, sortBy);
             return ResponseEntity.ok(leaderboard);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
