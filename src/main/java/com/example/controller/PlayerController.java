@@ -4,6 +4,9 @@ import com.example.model.Player;
 import com.example.model.PlayerStats;
 import com.example.service.PlayerService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -89,6 +92,13 @@ public class PlayerController {
         return ResponseEntity.ok(leaderboard);
     }
     
+    // Clear all players (for testing purposes)
+    @DeleteMapping("/clear")
+    public ResponseEntity<Void> clearAllPlayers() {
+        playerService.clearAllPlayers();
+        return ResponseEntity.ok().build();
+    }
+    
     // Get most active players
     @GetMapping("/most-active")
     public ResponseEntity<List<Player>> getMostActivePlayers(
@@ -114,7 +124,12 @@ public class PlayerController {
     
     // Request/Response DTOs
     public static class CreatePlayerRequest {
+        @NotBlank(message = "Player name is required")
+        @Size(min = 1, max = 100, message = "Player name must be between 1 and 100 characters")
         private String name;
+        
+        @NotBlank(message = "Email is required")
+        @Email(message = "Email must be valid")
         private String email;
         
         // Getters and Setters
@@ -136,7 +151,12 @@ public class PlayerController {
     }
     
     public static class UpdatePlayerRequest {
+        @NotBlank(message = "Player name is required")
+        @Size(min = 1, max = 100, message = "Player name must be between 1 and 100 characters")
         private String name;
+        
+        @NotBlank(message = "Email is required")
+        @Email(message = "Email must be valid")
         private String email;
         
         // Getters and Setters
@@ -157,5 +177,3 @@ public class PlayerController {
         }
     }
 }
-
-// TODO: Complete players routes (update, delete, search) [ttt.todo.routes.players.complete]

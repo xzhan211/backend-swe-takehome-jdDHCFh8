@@ -95,6 +95,11 @@ public class PlayerService {
             .collect(Collectors.toList());
     }
     
+    // Clear all players (for testing purposes)
+    public void clearAllPlayers() {
+        players.clear();
+    }
+    
     // Get players with most games played
     public List<Player> getMostActivePlayers(int limit) {
         return players.values().stream()
@@ -146,6 +151,3 @@ public class PlayerService {
             .collect(Collectors.toList());
     }
 }
-
-// TODO: Implement PlayerService (create/get/update/delete/search/stats) [ttt.todo.service.player.complete]
-// TODO: Complete players routes (update, delete, search) [ttt.todo.routes.players.complete]
