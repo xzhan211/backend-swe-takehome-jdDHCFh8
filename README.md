@@ -191,4 +191,13 @@ curl -s http://localhost:8080/api/players?name=Alice | jq .
 3. Update this README with any setup notes (DONE)
 4. Submit your repository URL (DONE - https://github.com/xzhan211/backend-swe-takehome-jdDHCFh8)
 
+
+## Key evolution in the future
+1. Currently we keep repository and H2 DB but we only use pure in-memory data structures. Data will lose when service is down.
+It's ready for when someone wants to add database persistence. (RDBMS like Postgres or MySQL should be good, NoSQL is good as well, since the query/business logic is simple.)
+2. Authentication and authorization (e.g. Google SSO)
+3. The service should be scalable for HA, at least 2 pods for the low throughput service.
+4. Having a chat window for players should ensure better UX.
+
+
 Good luck! 🚀
