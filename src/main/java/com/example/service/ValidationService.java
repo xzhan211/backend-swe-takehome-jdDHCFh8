@@ -12,11 +12,18 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.regex.Pattern;
+import java.util.Set;
 
 @Service
 @Validated
 public class ValidationService {
+    
+    @Autowired
+    private Validator validator;
     
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
         "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
@@ -221,6 +228,46 @@ public class ValidationService {
         
         return email.trim().toLowerCase();
     }
+    
+    // Comprehensive validation methods using Bean Validation
+    public Set<ConstraintViolation<Player>> validatePlayerComprehensive(Player player) {
+        return validator.validate(player);
+    }
+    
+    public Set<ConstraintViolation<Game>> validateGameComprehensive(Game game) {
+        return validator.validate(game);
+    }
+    
+    public Set<ConstraintViolation<Move>> validateMoveComprehensive(Move move) {
+        return validator.validate(move);
+    }
+    
+    // Validation helper methods
+    public boolean isValidPlayer(Player player) {
+        return validatePlayerComprehensive(player).isEmpty();
+    }
+    
+    public boolean isValidGame(Game game) {
+        return validateGameComprehensive(game).isEmpty();
+    }
+    
+    public boolean isValidMove(Move move) {
+        return validateMoveComprehensive(move).isEmpty();
+    }
+    
+    // Get validation error messages
+    public String getValidationErrors(Set<ConstraintViolation<?>> violations) {
+        if (violations.isEmpty()) {
+            return "";
+        }
+        
+        StringBuilder errors = new StringBuilder();
+        for (ConstraintViolation<?> violation : violations) {
+            errors.append(violation.getPropertyPath())
+                  .append(": ")
+                  .append(violation.getMessage())
+                  .append("; ");
+        }
+        return errors.toString();
+    }
 }
-
-// TODO: Add Player and Game model input validation [ttt.todo.model.validation]

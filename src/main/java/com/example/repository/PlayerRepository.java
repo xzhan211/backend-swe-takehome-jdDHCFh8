@@ -44,5 +44,3 @@ public interface PlayerRepository extends JpaRepository<Player, String> {
                                          @Param("endDate") java.time.LocalDateTime endDate);
 }
 
-// TODO: Complete players routes (update, delete, search) [ttt.todo.routes.players.complete]
-// TODO: Add Player and Game model input validation [ttt.todo.model.validation]

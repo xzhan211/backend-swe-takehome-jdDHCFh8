@@ -2,6 +2,11 @@ package com.example.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,36 +17,51 @@ public class Move {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NotBlank(message = "Game ID is required")
     @Column(name = "game_id", nullable = false)
     private String gameId;
     
+    @NotBlank(message = "Player ID is required")
     @Column(name = "player_id", nullable = false)
     private String playerId;
     
+    @Min(value = 0, message = "Row position must be at least 0")
+    @Max(value = 2, message = "Row position must be at most 2")
     @Column(name = "row_position", nullable = false)
     private int row;
     
+    @Min(value = 0, message = "Column position must be at least 0")
+    @Max(value = 2, message = "Column position must be at most 2")
     @Column(name = "col_position", nullable = false)
     private int col;
     
+    @Min(value = 1, message = "Move number must be at least 1")
+    @Max(value = 9, message = "Move number must be at most 9")
     @Column(name = "move_number", nullable = false)
     private int moveNumber;
     
+    @Min(value = 0, message = "Position must be at least 0")
+    @Max(value = 8, message = "Position must be at most 8")
     @Column(name = "position", nullable = false)
     private int position;
     
+    @NotBlank(message = "Symbol is required")
+    @Pattern(regexp = "^[XO]$", message = "Symbol must be either X or O")
     @Column(name = "symbol", nullable = false)
     private String symbol;
     
+    @NotNull(message = "Game reference is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id", insertable = false, updatable = false)
     @JsonIgnore
     private Game game;
     
+    @NotNull(message = "Player reference is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id", insertable = false, updatable = false)
     private Player player;
     
+    @NotNull(message = "Created date is required")
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     

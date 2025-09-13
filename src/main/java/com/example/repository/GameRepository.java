@@ -57,4 +57,3 @@ public interface GameRepository extends JpaRepository<Game, String> {
     List<Game> findGamesByPlayerAndStatus(@Param("playerId") String playerId, @Param("status") Game.GameStatus status);
 }
 
-// TODO: Add Player and Game model input validation [ttt.todo.model.validation]

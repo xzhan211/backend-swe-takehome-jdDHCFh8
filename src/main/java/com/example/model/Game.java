@@ -5,6 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,19 +22,26 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     
-    @Size(max = 100, message = "Game name must be less than 100 characters")
-    @Column
+    @NotBlank(message = "Game name is required")
+    @Size(min = 1, max = 100, message = "Game name must be between 1 and 100 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9\\s\\-_]+$", message = "Game name can only contain letters, numbers, spaces, hyphens, and underscores")
+    @Column(nullable = false)
     private String name;
     
+    @NotNull(message = "Game status is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GameStatus status = GameStatus.WAITING;
     
+    @NotNull(message = "Game board is required")
+    @Size(min = 9, max = 9, message = "Game board must have exactly 9 cells")
     @ElementCollection
     @CollectionTable(name = "game_board", joinColumns = @JoinColumn(name = "game_id"))
     @Column(name = "cell_value")
     private List<String> board = new ArrayList<>();
     
+    @NotNull(message = "Players list is required")
+    @Size(max = 2, message = "A game can have at most 2 players")
     @ManyToMany
     @JoinTable(
         name = "game_players",
@@ -51,10 +62,12 @@ public class Game {
     @JsonIgnore
     private List<Move> moves = new ArrayList<>();
     
+    @NotNull(message = "Created date is required")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(nullable = false)
     private LocalDateTime createdAt;
     
+    @NotNull(message = "Updated date is required")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(nullable = false)
     private LocalDateTime updatedAt;
@@ -281,5 +294,3 @@ public class Game {
         this.updatedAt = updatedAt;
     }
 }
-
-// TODO: Add Player and Game model input validation [ttt.todo.model.validation]

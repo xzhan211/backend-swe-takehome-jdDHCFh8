@@ -201,4 +201,3 @@ public class GameService {
     }
 }
 
-// TODO: Implement basic leaderboard endpoint [ttt.feature.leaderboard.basic]

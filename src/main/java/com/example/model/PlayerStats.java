@@ -1,17 +1,39 @@
 package com.example.model;
 
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 
 @Embeddable
 public class PlayerStats {
     
+    @Min(value = 0, message = "Games played cannot be negative")
     private int gamesPlayed = 0;
+    
+    @Min(value = 0, message = "Games won cannot be negative")
     private int gamesWon = 0;
+    
+    @Min(value = 0, message = "Games lost cannot be negative")
     private int gamesLost = 0;
+    
+    @Min(value = 0, message = "Games drawn cannot be negative")
     private int gamesDrawn = 0;
+    
+    @Min(value = 0, message = "Total moves cannot be negative")
     private int totalMoves = 0;
+    
+    @Min(value = 0, message = "Average moves per win cannot be negative")
+    @Max(value = 9, message = "Average moves per win cannot exceed 9")
     private double averageMovesPerWin = 0.0;
+    
+    @DecimalMin(value = "0.0", message = "Win rate cannot be negative")
+    @DecimalMax(value = "1.0", message = "Win rate cannot exceed 1.0")
     private double winRate = 0.0;
+    
+    @DecimalMin(value = "0.0", message = "Efficiency cannot be negative")
+    @DecimalMax(value = "1.0", message = "Efficiency cannot exceed 1.0")
     private double efficiency = 0.0;
     
     // Default constructor
@@ -133,5 +155,3 @@ public class PlayerStats {
         }
     }
 }
-
-// TODO: Implement basic leaderboard endpoint [ttt.feature.leaderboard.basic]
